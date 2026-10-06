@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Studio Admin — Ar. Haseeb Ullah</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+<style>
+  /* Admin gets its own distinct chrome so it never reads as part of the
+     public portfolio — same drafting-table material language, different
+     top bar treatment, clearly marked restricted-access strip. */
+  body{background:var(--paper-dim);}
+  .admin-topbar{background:var(--ink);color:var(--white);border-bottom:3px solid #8A3B2E;}
+  .restricted-badge{
+    font-family:var(--font-mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;
+    background:#8A3B2E;color:var(--white);padding:.25rem .6rem;border-radius:2px;
+  }
+  .admin-sidebar{background:var(--surface);border-right:1px solid var(--paper-line);min-height:calc(100vh - 64px);width:100%;}
+  .admin-sidebar .side-link{
+    display:flex;align-items:center;gap:.7rem;padding:.75rem 1.1rem;color:var(--ink-soft);
+    font-family:var(--font-mono);font-size:.75rem;letter-spacing:.03em;text-transform:uppercase;
+    border-left:3px solid transparent;cursor:pointer;
+  }
+  .admin-sidebar .side-link:hover{background:var(--paper-dim);}
+  .admin-sidebar .side-link.active{border-left-color:var(--brass);color:var(--brass-light);background:rgba(201,164,102,.14);font-weight:700;}
+  @media (min-width:992px){
+    /* Fixed rail — it must not absorb the shrinking that main needs to do. */
+    .admin-sidebar{flex:0 0 240px;width:240px;max-width:240px;}
+  }
+  /* style.css gives every <main> flex:1 0 auto for the public pages' sticky
+     footer. Here main is a flex ROW item, and shrink:0 means it can never give
+     ground — it grows to its content and pushes the page into a horizontal
+     scroll. min-width:0 lets its children back down too. */
+  #dashboard main{flex:1 1 auto;min-width:0;}
+  #dashboard main .row{--bs-gutter-x:1rem;}
+  #dashboard .admin-panel-card{max-width:100%;overflow-wrap:break-word;}
+  #dashboard .table-responsive{max-width:100%;}
+  @media (max-width:575.98px){
+    #dashboard main{padding:1rem !important;}
+    .admin-panel-card{padding:1.1rem;}
+  }
+  @media (max-width:991.98px){
+    .admin-sidebar{
+      display:flex;flex-direction:row;overflow-x:auto;-webkit-overflow-scrolling:touch;
+      min-height:auto;border-right:0;border-bottom:1px solid var(--paper-line);
+    }
+    .admin-sidebar .side-link{
+      flex:0 0 auto;white-space:nowrap;border-left:0;border-bottom:3px solid transparent;padding:.75rem .9rem;
+    }
+    .admin-sidebar .side-link.active{border-left-color:transparent;border-bottom-color:var(--brass);}
+  }
+  .admin-panel-card{background:var(--surface);border:1px solid var(--paper-line);border-radius:var(--radius);padding:1.75rem;margin-bottom:1.75rem;}
+  .admin-panel-card h2{font-size:1.05rem;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.04em;color:var(--text);border-bottom:1px solid var(--paper-line);padding-bottom:.75rem;margin-bottom:1.25rem;}
+  .admin-panel-card label{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:.3rem;}
+  .form-control,.form-select{border-radius:2px;border-color:var(--paper-line);font-size:.88rem;background:var(--paper-dim);color:var(--text);}
+  .form-select{
+    background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23EDE7DA' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat:no-repeat;
+    background-position:right .75rem center;
+    background-size:16px 12px;
+  }
+  .form-control::placeholder{color:var(--ink-faint);}
+  .form-control:focus,.form-select:focus{border-color:var(--brass);box-shadow:0 0 0 .2rem rgba(201,164,102,.25);background:var(--paper-dim);color:var(--text);}
+  .admin-table th{font-family:var(--font-mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);border-bottom-width:1px;border-color:var(--paper-line);}
+  .admin-table td{font-size:.85rem;vertical-align:middle;border-color:var(--paper-line);}
+  .thumb64{width:52px;height:52px;object-fit:cover;border-radius:2px;border:1px solid var(--paper-line);}
+  .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;}
+  .drop-zone{border:2px dashed var(--paper-line);border-radius:2px;padding:1.75rem;text-align:center;cursor:pointer;transition:.2s;}
+  .drop-zone.drag{border-color:var(--brass);background:rgba(201,164,102,.14);}
+
+  /* Every admin control reads brass. Destructive actions stay red — that
+     colour is the only thing separating "delete" from "edit" at a glance. */
+  .btn-outline-paper{border-color:var(--brass);color:var(--brass-light);}
+  .btn-outline-paper:hover{background:var(--brass);color:var(--ink);border-color:var(--brass);}
+  .btn-outline-secondary{
+    --bs-btn-color:var(--brass-light);
+    --bs-btn-border-color:rgba(201,164,102,.55);
+    --bs-btn-hover-bg:var(--brass);
+    --bs-btn-hover-color:var(--ink);
+    --bs-btn-hover-border-color:var(--brass);
+    --bs-btn-disabled-color:rgba(201,164,102,.4);
+    --bs-btn-disabled-border-color:rgba(201,164,102,.25);
+  }
+</style>
+</head>
+<body data-page="admin">
+
+<!-- LOGIN GATE -->
+<div id="login-screen" class="login-wrap">
+  <div class="card-plate p-5" style="max-width:400px;width:92%;">
+    <p class="eyebrow mb-2">Studio Access</p>
+    <h1 class="section-title" style="font-size:1.6rem;">Admin Sign In</h1>
+    <p style="color:var(--ink-faint);font-size:.83rem;" class="mb-4">This dashboard is separate from the public portfolio. Enter the studio password to manage content.</p>
+    <form id="login-form">
+      <label class="form-label font-mono" style="font-size:.7rem;text-transform:uppercase;color:var(--ink-faint);">Password</label>
+      <input type="password" class="form-control mb-3" id="login-password" required autofocus>
+      <div id="login-error" class="text-danger mb-3 d-none" style="font-size:.8rem;">Incorrect password. Please try again.</div>
+      <button type="submit" class="btn-brass w-100">Sign In</button>
+    </form>
+    <a href="index.html" class="d-inline-flex align-items-center gap-2 mt-4" style="font-size:.78rem;color:var(--ink-faint);"><i class="fa-solid fa-arrow-left"></i> Back to portfolio</a>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="d-none">
+
+  <header class="admin-topbar py-3">
+    <div class="container-wide d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <div class="d-flex align-items-center gap-3">
+        <span class="font-display fs-5">Studio Admin</span>
+        <span class="restricted-badge">Restricted Access</span>
+      </div>
+      <div class="d-flex align-items-center gap-3">
+        <a href="index.html" target="_blank" class="btn btn-outline-paper btn-sm"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>View Live Site</a>
+        <button class="btn btn-outline-paper btn-sm" onclick="logout()"><i class="fa-solid fa-right-from-bracket me-1"></i>Log Out</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="d-flex flex-column flex-lg-row">
+    <nav class="admin-sidebar py-3">
+      <div class="side-link active" data-tab="profile" onclick="showTab('profile')"><i class="fa-solid fa-id-badge"></i>Profile &amp; Hero</div>
+      <div class="side-link" data-tab="about" onclick="showTab('about')"><i class="fa-solid fa-align-left"></i>About</div>
+      <div class="side-link" data-tab="services" onclick="showTab('services')"><i class="fa-solid fa-drafting-compass"></i>Services</div>
+      <div class="side-link" data-tab="process" onclick="showTab('process')"><i class="fa-solid fa-diagram-project"></i>Design Process</div>
+      <div class="side-link" data-tab="portfolio" onclick="showTab('portfolio')"><i class="fa-solid fa-layer-group"></i>Portfolio</div>
+      <div class="side-link" data-tab="ebooks" onclick="showTab('ebooks')"><i class="fa-solid fa-book-open"></i>E-Books &amp; Papers</div>
+      <div class="side-link" data-tab="location" onclick="showTab('location')"><i class="fa-solid fa-location-dot"></i>Location &amp; Contact</div>
+      <div class="side-link" data-tab="settings" onclick="showTab('settings')"><i class="fa-solid fa-gear"></i>Site Text &amp; Settings</div>
+    </nav>
+
+    <main class="flex-grow-1 p-4">
+
+      <!-- PROFILE & HERO -->
+      <section class="admin-tab" data-tab="profile">
+        <div class="admin-panel-card">
+          <h2>Profile Panel</h2>
+          <div class="row g-3">
+            <div class="col-md-4"><label>Architect Name</label><input type="text" class="form-control" id="p-name"></div>
+            <div class="col-md-4"><label>Professional Title</label><input type="text" class="form-control" id="p-title"></div>
+            <div class="col-md-4"><label>Profile Photo URL</label><input type="text" class="form-control" id="p-image"></div>
+            <div class="col-md-8">
+              <label>Or Upload Profile Photo (JPG / PNG)</label>
+              <div class="d-flex align-items-center gap-3">
+                <img id="p-image-preview" class="thumb64" alt="" style="flex:0 0 auto;">
+                <div style="min-width:0;flex:1 1 auto;">
+                  <input type="file" class="form-control" id="p-image-file" accept="image/*" onchange="previewProfileImage(this)">
+                  <div id="p-image-file-label" style="font-size:.68rem;color:var(--ink-faint);margin-top:.3rem;">An uploaded photo replaces the URL above when you press Save Profile.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="btn-brass mt-3" onclick="saveProfile()">Save Profile</button>
+        </div>
+
+        <div class="admin-panel-card">
+          <h2>Social &amp; Profile Links</h2>
+          <p style="font-size:.78rem;color:var(--ink-faint);margin-top:-.75rem;">These appear in the site footer and the home hero chip. Add any platform you like — YouTube, Behance, a personal site.</p>
+          <div id="socials-list"></div>
+          <hr class="rule">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h3 id="sl-form-header" style="font-size:.85rem;font-family:var(--font-mono);text-transform:uppercase;color:var(--ink-faint);margin:0;">Add Link</h3>
+            <button class="btn btn-sm btn-outline-secondary d-none" id="sl-cancel-btn" onclick="resetSocialForm()">Cancel Edit</button>
+          </div>
+          <input type="hidden" id="sl-editing-key" value="">
+          <div class="row g-3 mt-1">
+            <div class="col-md-3"><label>Platform Name</label><input type="text" class="form-control" id="sl-key" placeholder="e.g. youtube"></div>
+            <div class="col-md-5"><label>URL</label><input type="text" class="form-control" id="sl-url" placeholder="https://..."></div>
+            <div class="col-md-4">
+              <label>Icon (Font Awesome)</label>
+              <input type="text" class="form-control" id="sl-icon" placeholder="fa-brands fa-youtube">
+              <div style="font-size:.68rem;color:var(--ink-faint);margin-top:.3rem;">Leave blank to auto-pick from the platform name.</div>
+            </div>
+          </div>
+          <button class="btn-brass mt-3" id="sl-submit-btn" onclick="saveSocialLink()">Add Link</button>
+        </div>
+
+        <div class="admin-panel-card">
+          <h2>Upcoming / In-Progress Projects (Home Hero Slider)</h2>
+          <div id="hero-list"></div>
+          <hr class="rule">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h3 id="hs-form-header" style="font-size:.85rem;font-family:var(--font-mono);text-transform:uppercase;color:var(--ink-faint);margin:0;">Add Slide</h3>
+            <button class="btn btn-sm btn-outline-secondary d-none" id="hs-cancel-btn" onclick="resetHeroSlideForm()">Cancel Edit</button>
+          </div>
+          <input type="hidden" id="hs-editing-index" value="">
+          <div class="row g-3 mt-1">
+            <div class="col-md-4"><label>Title</label><input type="text" class="form-control" id="hs-title"></div>
+            <div class="col-md-4"><label>Status</label><input type="text" class="form-control" id="hs-status" placeholder="Concept Stage"></div>
+            <div class="col-md-4"><label>Location</label><input type="text" class="form-control" id="hs-location"></div>
+            <div class="col-12">
+              <label>Background Image</label>
+              <div class="drop-zone" id="hero-slide-drop-zone" style="padding:1rem;">
+                <i class="fa-solid fa-image mb-1" style="color:var(--ink-faint);"></i>
+                <p class="mb-0" id="hero-slide-file-label" style="font-size:.78rem;color:var(--ink-faint);">Drag &amp; drop an image here, or click to select one</p>
+                <input type="file" id="hs-image-file" accept="image/*" class="d-none" onchange="previewHeroSlideImage(this)">
+              </div>
+            </div>
+          </div>
+          <button class="btn-brass mt-3" id="hs-submit-btn" onclick="saveHeroSlide()">Add Slide</button>
+        </div>
+      </section>
+
+      <!-- ABOUT -->
+      <section class="admin-tab d-none" data-tab="about">
+        <div class="admin-panel-card">
+          <h2>About Us Section</h2>
+          <label>Heading</label><input type="text" class="form-control mb-3" id="a-heading">
+          <div class="row g-3">
+            <div class="col-md-6"><label>Paragraph 1</label><textarea class="form-control" rows="4" id="a-bio1"></textarea></div>
+            <div class="col-md-6"><label>Paragraph 2</label><textarea class="form-control" rows="4" id="a-bio2"></textarea></div>
+          </div>
+          <hr class="rule">
+          <h3 style="font-size:.85rem;font-family:var(--font-mono);text-transform:uppercase;color:var(--ink-faint);">Stat Highlights</h3>
+          <div class="row g-3">
+            <div class="col-md-4"><label>Stat 1 Value</label><input type="text" class="form-control mb-2" id="a-stat1v"><label>Stat 1 Label</label><input type="text" class="form-control" id="a-stat1l"></div>
+            <div class="col-md-4"><label>Stat 2 Value</label><input type="text" class="form-control mb-2" id="a-stat2v"><label>Stat 2 Label</label><input type="text" class="form-control" id="a-stat2l"></div>
+            <div class="col-md-4"><label>Stat 3 Value</label><input type="text" class="form-control mb-2" id="a-stat3v"><label>Stat 3 Label</label><input type="text" class="form-control" id="a-stat3l"></div>
+          </div>
+          <button class="btn-brass mt-3" onclick="saveAbout()">Save About Changes</button>
+        </div>
+      </section>
+
+      <!-- SERVICES -->
+      <section class="admin-tab d-none" data-tab="services">
+        <div class="admin-panel-card">
+          <h2>Services Offered</h2>
+          <div id="services-list"></div>
+          <hr class="rule">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h3 id="sv-form-header" style="font-size:.85rem;font-family:var(--font-mono);text-transform:uppercase;color:var(--ink-faint);margin:0;">Add Service</h3>
+            <button class="btn btn-sm btn-outline-secondary d-none" id="sv-cancel-btn" onclick="resetServiceForm()">Cancel Edit</button>
+          </div>
+          <input type="hidden" id="sv-editing-index" value="">
+          <div class="row g-3 mt-1">
+            <div class="col-md-3"><label>Font Awesome Icon (e.g. fa-cubes)</label><input type="text" class="form-control" id="sv-icon" placeholder="fa-cubes"></div>
+            <div class="col-md-3">
+              <label>Or Upload Icon Image</label>
+              <input type="file" class="form-control" id="sv-icon-file" accept="image/*" onchange="previewServiceIcon(this)">
+              <div id="sv-icon-file-label" style="font-size:.68rem;color:var(--ink-faint);margin-top:.3rem;">PNG, JPG or SVG. Overrides the Font Awesome icon.</div>
+            </div>
+            <div class="col-md-3"><label>Title</label><input type="text" class="form-control" id="sv-title"></div>
+            <div class="col-md-3"><label>Description</label><input type="text" class="form-control" id="sv-desc"></div>
+          </div>
+          <button class="btn-brass mt-3" id="sv-submit-btn" onclick="saveService()">Add Service</button>
+        </div>
+      </section>
+
+      <!-- PROCESS -->
+      <section class="admin-tab d-none" data-tab="process">
+        <div class="admin-panel-card">
+          <h2>Design Process Steps</h2>
+          <div id="process-list"></div>
+          <hr class="rule">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h3 id="pr-form-header" style="font-size:.85rem;font-family:var(--font-mono);text-transform:uppercase;color:var(--ink-faint);margin:0;">Add Step</h3>
+            <button class="btn btn-sm btn-outline-secondary d-none" id="pr-cancel-btn" onclick="resetProcessForm()">Cancel Edit</button>
+          </div>
+          <input type="hidden" id="pr-editing-index" value="">
+          <div class="row g-3 mt-1">
+            <div class="col-md-2"><label>Step No.</label><input type="text" class="form-control" id="pr-step" placeholder="05"></div>
+            <div class="col-md-3">
+              <label>Step Icon Image</label>
+              <input type="file" class="form-control" id="pr-icon-file" accept="image/*" onchange="previewProcessIcon(this)">
+              <div id="pr-icon-file-label" style="font-size:.68rem;color:var(--ink-faint);margin-top:.3rem;">Optional — replaces the step numeral on the site.</div>
+            </div>
+            <div class="col-md-3"><label>Title</label><input type="text" class="form-control" id="pr-title"></div>
+            <div class="col-md-4"><label>Description</label><input type="text" class="form-control" id="pr-desc"></div>
+          </div>
+          <button class="btn-brass mt-3" id="pr-submit-btn" onclick="saveProcessStep()">Add Step</button>
+        </div>
+      </section>
+
+      <!-- PORTFOLIO -->
+      <section class="admin-tab d-none" data-tab="portfolio">
+        <div class="admin-panel-card">
+          <h2>Typology Categories</h2>
+          <p style="font-size:.78rem;color:var(--ink-faint);margin-top:-.75rem;">Order here controls the order shown on the Home and Portfolio pages. Renaming a category updates every project already filed under it.</p>
+          <div id="category-list" class="mb-3"></div>
+          <div class="d-flex gap-2">
+            <input type="text" class="form-control" id="new-category-name" placeholder="e.g. Heritage, Landscape, Urban Design">
+            <button class="btn-brass text-nowrap" onclick="addNewCategory()">Add Category</button>
+          </div>
+        </div>
+
+        <div class="admin-panel-card">
+          <h2>Category Background Images</h2>
+          <p style="font-size:.8rem;color:var(--ink-soft);margin-top:-.5rem;">Upload photos per category — they auto-rotate as a subtle background on the Home and Portfolio pages.</p>
+          <div id="category-bg-manager"></div>
+        </div>
+
+        <div class="admin-panel-card">
+          <div class="d-flex justify-content-between align-items-center">
+            <h2 class="mb-0 border-0 pb-0" id="proj-form-header">Upload New Project</h2>
+            <button class="btn btn-sm btn-outline-secondary d-none" id="proj-cancel-btn" onclick="resetProjectForm()">Cancel Edit</button>
+          </div>
+          <form id="project-form" class="row g-3 mt-1" onsubmit="handleProjectSubmit(event)">
+            <input type="hidden" id="proj-editing-id">
+            <div class="col-md-4"><label>Project Title</label><input type="text" class="form-control" id="proj-title" required></div>
+            <div class="col-md-4">
+              <label>Category (project type)</label>
+              <select class="form-select" id="proj-category" required onchange="handleCategorySelectChange(this)"></select>
+              <div style="font-size:.68rem;color:var(--ink-faint);margin-top:.3rem;">Don't see the right type? Choose "+ Add New Category" — it's created and shown on the site immediately.</div>
+            </div>
+            <div class="col-md-4"><label>Client Name</label><input type="text" class="form-control" id="proj-client" required></div>
+            <div class="col-md-6"><label>Location</label><input type="text" class="form-control" id="proj-location" required></div>
+            <div class="col-md-6"><label>Year</label><input type="text" class="form-control" id="proj-year" required placeholder="2026"></div>
+            <div class="col-12"><label>Project Description</label><textarea class="form-control" rows="3" id="proj-desc" required></textarea></div>
+            <div class="col-12">
+              <label>Project Photos (multiple)</label>
+              <div class="drop-zone" id="drop-zone">
+                <i class="fa-solid fa-images fs-3 mb-2" style="color:var(--ink-faint);"></i>
+                <p class="mb-0" id="file-label" style="font-size:.82rem;color:var(--ink-faint);">Drag &amp; drop images here, or click to select files</p>
+                <input type="file" id="proj-file" accept="image/*" multiple class="d-none" onchange="previewFiles(this)">
+              </div>
+            </div>
+            <div class="col-12"><button type="submit" class="btn-brass" id="proj-submit-btn">Publish Project</button></div>
+          </form>
+        </div>
+
+        <div class="admin-panel-card">
+          <h2>Published Projects (<span id="proj-count">0</span>)</h2>
+          <div class="table-responsive">
+            <table class="table admin-table">
+              <thead><tr><th>Photo</th><th>Title</th><th>Category</th><th>Client</th><th>Year</th><th></th></tr></thead>
+              <tbody id="projects-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- E-BOOKS -->
+      <section class="admin-tab d-none" data-tab="ebooks">
+        <div class="admin-panel-card">
+          <div class="d-flex justify-content-between align-items-center">
+            <h2 class="mb-0 border-0 pb-0" id="ebook-form-header">Upload New E-Book / Paper</h2>
+            <button class="btn btn-sm btn-outline-secondary d-none" id="ebook-cancel-btn" onclick="resetEbookForm()">Cancel Edit</button>
+          </div>
+          <form id="ebook-form" class="row g-3 mt-1" onsubmit="handleEbookSubmit(event)">
+            <input type="hidden" id="ebook-editing-id">
+            <div class="col-md-6"><label>Publication Title</label><input type="text" class="form-control" id="ebook-title" required></div>
+            <div class="col-md-6"><label>Author Name(s)</label><input type="text" class="form-control" id="ebook-author" required></div>
+            <div class="col-md-4">
+              <label>Format Type</label>
+              <select class="form-select" id="ebook-type">
+                <option>E-Book / Guide</option><option>Research Paper</option><option>Technical Manual</option>
+              </select>
+            </div>
+            <div class="col-md-4"><label>Year</label><input type="text" class="form-control" id="ebook-year" required placeholder="2026"></div>
+            <div class="col-md-4"><label>Cover Image URL</label><input type="text" class="form-control" id="ebook-cover"></div>
+            <div class="col-12"><label>Summary / Description</label><textarea class="form-control" rows="2" id="ebook-desc" required></textarea></div>
+            <div class="col-12">
+              <label>PDF File (or leave blank to keep URL below)</label>
+              <input type="file" class="form-control mb-2" id="ebook-pdf-file" accept="application/pdf" onchange="previewPdf(this)">
+              <label>PDF URL</label>
+              <input type="text" class="form-control" id="ebook-pdf-url" placeholder="https://...">
+            </div>
+            <div class="col-12"><button type="submit" class="btn-brass" id="ebook-submit-btn">Publish E-Book / Paper</button></div>
+          </form>
+        </div>
+
+        <div class="admin-panel-card">
+          <h2>Published Publications (<span id="ebook-count">0</span>)</h2>
+          <div class="table-responsive">
+            <table class="table admin-table">
+              <thead><tr><th>Cover</th><th>Title</th><th>Type</th><th>Author</th><th>Year</th><th></th></tr></thead>
+              <tbody id="ebooks-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- LOCATION -->
+      <section class="admin-tab d-none" data-tab="location">
+        <div class="admin-panel-card">
+          <h2>Location &amp; Contact</h2>
+          <div class="row g-3">
+            <div class="col-md-6"><label>Studio Name</label><input type="text" class="form-control" id="loc-name"></div>
+            <div class="col-md-6"><label>Tagline / Address</label><input type="text" class="form-control" id="loc-tagline"></div>
+            <div class="col-md-6"><label>Working Hours</label><input type="text" class="form-control" id="loc-hours"></div>
+            <div class="col-md-3"><label>Email</label><input type="text" class="form-control" id="loc-email"></div>
+            <div class="col-md-3"><label>Phone</label><input type="text" class="form-control" id="loc-phone"></div>
+            <div class="col-md-6"><label>Directions URL</label><input type="text" class="form-control" id="loc-directions"></div>
+            <div class="col-md-6"><label>Google Maps Embed URL</label><input type="text" class="form-control" id="loc-map"></div>
+          </div>
+          <button class="btn-brass mt-3" onclick="saveLocation()">Save Location Changes</button>
+        </div>
+      </section>
+
+      <!-- SITE TEXT & SETTINGS -->
+      <section class="admin-tab d-none" data-tab="settings">
+        <div class="admin-panel-card">
+          <h2>Header &amp; Footer Text</h2>
+          <div class="row g-3">
+            <div class="col-md-6"><label>Header Tagline (under the name, top nav)</label><input type="text" class="form-control" id="st-brand-tagline"></div>
+            <div class="col-md-6"><label>Footer Tagline</label><input type="text" class="form-control" id="st-footer-tagline"></div>
+            <div class="col-md-12"><label>Copyright Note (after the year and name)</label><input type="text" class="form-control" id="st-copyright-note"></div>
+          </div>
+          <button class="btn-brass mt-3" onclick="saveHeaderFooterText()">Save Header &amp; Footer Text</button>
+        </div>
+
+        <div class="admin-panel-card">
+          <h2>Home Page Copy</h2>
+          <div class="row g-3">
+            <div class="col-md-12"><label>Hero Eyebrow (small label above the hero title)</label><input type="text" class="form-control" id="st-hero-eyebrow"></div>
+            <div class="col-md-3"><label>CTA Eyebrow</label><input type="text" class="form-control" id="st-cta-eyebrow"></div>
+            <div class="col-md-5"><label>CTA Heading</label><input type="text" class="form-control" id="st-cta-heading"></div>
+            <div class="col-md-4"><label>CTA Button Label</label><input type="text" class="form-control" id="st-cta-button"></div>
+            <div class="col-12"><label>CTA Body Text</label><textarea class="form-control" rows="2" id="st-cta-body"></textarea></div>
+          </div>
+          <button class="btn-brass mt-3" onclick="saveHomeCopy()">Save Home Page Copy</button>
+        </div>
+
+        <div class="admin-panel-card">
+          <h2>Page Intros (Portfolio, E-Books, Services, Process, About, Location)</h2>
+          <div id="page-intro-fields" class="row g-3"></div>
+          <button class="btn-brass mt-3" onclick="savePageIntros()">Save Page Intros</button>
+        </div>
+
+        <div class="admin-panel-card">
+          <h2>Browser Tab Titles</h2>
+          <div id="page-title-fields" class="row g-3"></div>
+          <button class="btn-brass mt-3" onclick="savePageTitles()">Save Page Titles</button>
+        </div>
+
+        <div class="admin-panel-card">
+          <h2>Publish Content For Every Visitor</h2>
+          <p style="font-size:.8rem;color:var(--ink-soft);">
+            Everything you edit here is saved only in <em>this browser</em>. To make your
+            changes visible to every visitor after you deploy (e.g. on Vercel), download the
+            file below, paste its contents over the <code>DEFAULT_DATA</code> object in
+            <code>assets/js/data.js</code>, then commit &amp; push to GitHub. Vercel will
+            redeploy automatically and your edits become the new baseline for everyone.
+          </p>
+          <button class="btn-brass" onclick="exportForPublishing()"><i class="fa-solid fa-download me-2"></i>Download Content For Publishing</button>
+          <p style="font-size:.72rem;color:var(--ink-faint);margin-top:.75rem;margin-bottom:0;">
+            Your admin password is <strong>not</strong> included in this file — don't commit
+            real credentials to a public repo. Keep managing the password from the panel above.
+          </p>
+        </div>
+
+        <div class="admin-panel-card">
+          <h2>Change Admin Password</h2>
+          <form id="security-form" class="row g-3" onsubmit="changePassword(event)">
+            <div class="col-md-4"><label>Current Password</label><input type="password" class="form-control" id="sec-current" required></div>
+            <div class="col-md-4"><label>New Password</label><input type="password" class="form-control" id="sec-new" required minlength="6"></div>
+            <div class="col-md-4"><label>Confirm New Password</label><input type="password" class="form-control" id="sec-confirm" required minlength="6"></div>
+            <div class="col-12"><button type="submit" class="btn-brass">Update Password</button></div>
+          </form>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+  let data = Store.get();
+  let uploadedImages = [];
+  let uploadedPdf = null;
+
+  function persist(msg){ Store.save(data); showToast(msg || "Saved"); }
+
+  /* AUTH */
+  document.getElementById("login-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const pw = document.getElementById("login-password").value;
+    if(Auth.login(pw, data.settings.adminPassword)){ enterDashboard(); }
+    else { document.getElementById("login-error").classList.remove("d-none"); }
+  });
+  function logout(){ Auth.logout(); location.reload(); }
+  function enterDashboard(){
+    document.getElementById("login-screen").classList.add("d-none");
+    document.getElementById("dashboard").classList.remove("d-none");
+    renderAll();
+  }
+  // Auto-entry runs at the very bottom of this script, not here: renderAll()
+  // reads const/let bindings declared further down, and calling it this early
+  // hits their temporal dead zone and aborts the whole file.
+
+  /* TABS */
+  function showTab(tab){
+    document.querySelectorAll(".side-link").forEach(el => el.classList.toggle("active", el.dataset.tab === tab));
+    document.querySelectorAll(".admin-tab").forEach(el => el.classList.toggle("d-none", el.dataset.tab !== tab));
+  }
+
+  function renderAll(){
+    // Profile
+    document.getElementById("p-name").value = data.profile.name;
+    document.getElementById("p-title").value = data.profile.title;
+    document.getElementById("p-image").value = data.profile.image;
+    renderProfilePreview(data.profile.image);
+    renderSocialsList();
+    renderHeroList();
+
+    // About
+    document.getElementById("a-heading").value = data.about.heading;
+    document.getElementById("a-bio1").value = data.about.bio1;
+    document.getElementById("a-bio2").value = data.about.bio2;
+    document.getElementById("a-stat1v").value = data.about.stats[0]?.val || "";
+    document.getElementById("a-stat1l").value = data.about.stats[0]?.lbl || "";
+    document.getElementById("a-stat2v").value = data.about.stats[1]?.val || "";
+    document.getElementById("a-stat2l").value = data.about.stats[1]?.lbl || "";
+    document.getElementById("a-stat3v").value = data.about.stats[2]?.val || "";
+    document.getElementById("a-stat3l").value = data.about.stats[2]?.lbl || "";
+
+    renderServicesList();
+    renderProcessList();
+    populateCategorySelect();
+    renderCategoryChips();
+    renderCategoryBgManager();
+    renderProjectsTable();
+    renderEbooksTable();
+
+    // Location
+    document.getElementById("loc-name").value = data.location.name;
+    document.getElementById("loc-tagline").value = data.location.tagline;
+    document.getElementById("loc-hours").value = data.location.hours;
+    document.getElementById("loc-email").value = data.location.email;
+    document.getElementById("loc-phone").value = data.location.phone;
+    document.getElementById("loc-directions").value = data.location.directionsUrl;
+    document.getElementById("loc-map").value = data.location.mapEmbed;
+
+    // Site text & settings
+    document.getElementById("st-brand-tagline").value = data.siteText.brandTagline;
+    document.getElementById("st-footer-tagline").value = data.siteText.footerTagline;
+    document.getElementById("st-copyright-note").value = data.siteText.copyrightNote;
+    document.getElementById("st-hero-eyebrow").value = data.siteText.homeHeroEyebrow;
+    document.getElementById("st-cta-eyebrow").value = data.siteText.homeCta.eyebrow;
+    document.getElementById("st-cta-heading").value = data.siteText.homeCta.heading;
+    document.getElementById("st-cta-button").value = data.siteText.homeCta.buttonLabel;
+    document.getElementById("st-cta-body").value = data.siteText.homeCta.body;
+    renderPageIntroFields();
+    renderPageTitleFields();
+
+    setupDragAndDrop();
+    setupHeroSlideDropZone();
+  }
+
+  /* SITE TEXT & SETTINGS */
+  /* One entry per public page that shows an intro block. `fields` lists only
+     what that page actually renders from here — About takes its heading from
+     the About tab and Location from the Location tab, so both offer just the
+     eyebrow rather than a box that edits nothing. */
+  const PAGE_INTROS = {
+    portfolio: { label: "Portfolio",        fields: ["eyebrow","heading","subtext"] },
+    ebooks:    { label: "E-Books & Papers", fields: ["eyebrow","heading","subtext"] },
+    services:  { label: "Services",         fields: ["eyebrow","heading","subtext"] },
+    process:   { label: "Design Process",   fields: ["eyebrow","heading","subtext"] },
+    about:     { label: "About",            fields: ["eyebrow"], note: "Heading and paragraphs live in the About tab." },
+    location:  { label: "Location",         fields: ["eyebrow"], note: "Studio name and details live in the Location tab." }
+  };
+  const FIELD_LABELS = { eyebrow: "Eyebrow", heading: "Heading", subtext: "Subtext" };
+  const PAGE_TITLE_LABELS = { home: "Home", portfolio: "Portfolio", ebooks: "E-Books & Papers", about: "About", services: "Services", process: "Design Process", location: "Location" };
+
+  function renderPageIntroFields(){
+    document.getElementById("page-intro-fields").innerHTML = Object.entries(PAGE_INTROS).map(([key,cfg]) => {
+      const intro = data.siteText.pageIntros[key] || {};
+      const inputs = cfg.fields.map(field => `
+          <label>${FIELD_LABELS[field]}</label>
+          <input type="text" class="form-control mb-2" id="pi-${key}-${field}" value="${escapeAttr(intro[field]||'')}">`).join("");
+      return `
+      <div class="col-md-6">
+        <div class="border rounded p-3" style="border-color:var(--paper-line)!important;">
+          <p class="font-mono mb-2" style="font-size:.68rem;text-transform:uppercase;color:var(--ink-faint);">${cfg.label} Page</p>
+          ${inputs}
+          ${cfg.note ? `<p class="mb-0" style="font-size:.68rem;color:var(--ink-faint);">${cfg.note}</p>` : ""}
+        </div>
+      </div>`;
+    }).join("");
+  }
+  function savePageIntros(){
+    Object.entries(PAGE_INTROS).forEach(([key,cfg]) => {
+      const intro = data.siteText.pageIntros[key] || (data.siteText.pageIntros[key] = {});
+      cfg.fields.forEach(field => { intro[field] = document.getElementById(`pi-${key}-${field}`).value; });
+    });
+    persist("Page intros saved");
+  }
+
+  function renderPageTitleFields(){
+    document.getElementById("page-title-fields").innerHTML = Object.entries(PAGE_TITLE_LABELS).map(([key,label]) => `
+      <div class="col-md-6">
+        <label>${label} Page &lt;title&gt;</label>
+        <input type="text" class="form-control" id="pt-${key}" value="${escapeAttr(data.siteText.pageTitles[key]||'')}">
+      </div>`).join("");
+  }
+  function savePageTitles(){
+    Object.keys(PAGE_TITLE_LABELS).forEach(key => {
+      data.siteText.pageTitles[key] = document.getElementById(`pt-${key}`).value;
+    });
+    persist("Page titles saved");
+  }
+
+  function saveHeaderFooterText(){
+    data.siteText.brandTagline = document.getElementById("st-brand-tagline").value;
+    data.siteText.footerTagline = document.getElementById("st-footer-tagline").value;
+    data.siteText.copyrightNote = document.getElementById("st-copyright-note").value;
+    persist("Header & footer text saved");
+  }
+
+  function saveHomeCopy(){
+    data.siteText.homeHeroEyebrow = document.getElementById("st-hero-eyebrow").value;
+    data.siteText.homeCta = {
+      eyebrow: document.getElementById("st-cta-eyebrow").value,
+      heading: document.getElementById("st-cta-heading").value,
+      buttonLabel: document.getElementById("st-cta-button").value,
+      body: document.getElementById("st-cta-body").value
+    };
+    persist("Home page copy saved");
+  }
+
+  function exportForPublishing(){
+    const exportable = structuredClone(data);
+    exportable.settings = { adminPassword: "haseeb2026" }; // never export the real password
+    const json = JSON.stringify(exportable, null, 2);
+    const fileContents =
+`/* PASTE THIS in place of the "const DEFAULT_DATA = { ... };" block in
+   assets/js/data.js, then commit & push to GitHub. Once your host
+   (e.g. Vercel) redeploys, this becomes the content every visitor sees
+   by default. Your real admin password was intentionally left out —
+   set/change it from the Settings tab after publishing, as usual. */
+
+const DEFAULT_DATA = ${json};
+`;
+    const blob = new Blob([fileContents], { type: "text/javascript" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "DEFAULT_DATA-export.js";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast("Downloaded — paste into assets/js/data.js");
+  }
+
+  function changePassword(e){
+    e.preventDefault();
+    const current = document.getElementById("sec-current").value;
+    const next = document.getElementById("sec-new").value;
+    const confirmPw = document.getElementById("sec-confirm").value;
+    if(current !== data.settings.adminPassword){ alert("Current password is incorrect."); return; }
+    if(next.length < 6){ alert("New password must be at least 6 characters."); return; }
+    if(next !== confirmPw){ alert("New password and confirmation don't match."); return; }
+    data.settings.adminPassword = next;
+    document.getElementById("security-form").reset();
+    persist("Password updated");
+  }
+
+  /* PROFILE & HERO */
+  // Holds a freshly uploaded photo until Save Profile is pressed. Null means
+  // "no new upload", and the URL field stays authoritative.
+  let profileUploadedImage = null;
+
+  function renderProfilePreview(src){
+    const img = document.getElementById("p-image-preview");
+    if(src){ img.src = src; img.style.visibility = "visible"; }
+    else { img.removeAttribute("src"); img.style.visibility = "hidden"; }
+  }
+
+  function previewProfileImage(input){
+    const file = input.files[0];
+    if(!file) return;
+    if(!file.type.startsWith("image/")){ alert("Please choose a JPG, PNG, or other image file."); input.value = ""; return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      profileUploadedImage = e.target.result;
+      renderProfilePreview(profileUploadedImage);
+      document.getElementById("p-image-file-label").textContent =
+        "Selected: " + file.name + " — press Save Profile to apply it.";
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function saveProfile(){
+    data.profile.name = document.getElementById("p-name").value;
+    data.profile.title = document.getElementById("p-title").value;
+    data.profile.image = profileUploadedImage || document.getElementById("p-image").value;
+    if(profileUploadedImage){
+      // The upload is now the stored value, so hand the URL field back its role.
+      document.getElementById("p-image").value = data.profile.image;
+      profileUploadedImage = null;
+      document.getElementById("p-image-file").value = "";
+      document.getElementById("p-image-file-label").textContent =
+        "Photo uploaded and saved. Choose another file to replace it.";
+    }
+    renderProfilePreview(data.profile.image);
+    persist("Profile saved");
+  }
+
+  /* SOCIAL LINKS — data.profile.socials stays a {platform: url} map so the
+     public pages keep reading it unchanged; custom glyphs live alongside it
+     in data.profile.socialIcons. */
+  function socialIconFor(key){
+    return (data.profile.socialIcons && data.profile.socialIcons[key])
+      || SOCIAL_ICONS[key]
+      || "fa-solid fa-link";
+  }
+
+  function renderSocialsList(){
+    const keys = Object.keys(data.profile.socials || {});
+    document.getElementById("socials-list").innerHTML = keys.map(key => `
+      <div class="d-flex align-items-center gap-3 border rounded p-2 mb-2" style="border-color:var(--paper-line)!important;">
+        <i class="${escapeAttr(socialIconFor(key))}" style="width:24px;text-align:center;color:var(--brass-light);flex:0 0 auto;"></i>
+        <div class="flex-grow-1" style="min-width:0;overflow-wrap:break-word;">
+          <div style="font-size:.85rem;font-weight:600;text-transform:capitalize;">${escapeHtml(key)}</div>
+          <div style="font-size:.72rem;color:var(--ink-faint);">${escapeHtml(data.profile.socials[key] || "")}</div>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" onclick="editSocialLink('${escapeAttr(key).replace(/'/g,"\\'")}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-sm btn-outline-danger" onclick="removeSocialLink('${escapeAttr(key).replace(/'/g,"\\'")}')" title="Remove"><i class="fa-solid fa-trash"></i></button>
+      </div>`).join("") || `<p style="color:var(--ink-faint);font-size:.85rem;">No links yet.</p>`;
+  }
+
+  function editSocialLink(key){
+    document.getElementById("sl-editing-key").value = key;
+    document.getElementById("sl-key").value = key;
+    document.getElementById("sl-url").value = data.profile.socials[key] || "";
+    document.getElementById("sl-icon").value = (data.profile.socialIcons && data.profile.socialIcons[key]) || SOCIAL_ICONS[key] || "";
+    document.getElementById("sl-form-header").textContent = "Edit Link";
+    document.getElementById("sl-submit-btn").textContent = "Save Changes";
+    document.getElementById("sl-cancel-btn").classList.remove("d-none");
+    document.getElementById("sl-url").focus();
+  }
+
+  function resetSocialForm(){
+    document.getElementById("sl-editing-key").value = "";
+    ["sl-key","sl-url","sl-icon"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("sl-form-header").textContent = "Add Link";
+    document.getElementById("sl-submit-btn").textContent = "Add Link";
+    document.getElementById("sl-cancel-btn").classList.add("d-none");
+  }
+
+  function saveSocialLink(){
+    const key = document.getElementById("sl-key").value.trim().toLowerCase();
+    const url = document.getElementById("sl-url").value.trim();
+    const icon = document.getElementById("sl-icon").value.trim();
+    if(!key || !url){ alert("Please add a platform name and a URL."); return; }
+    const editing = document.getElementById("sl-editing-key").value;
+
+    if(editing && editing !== key){
+      // Renaming: drop the old key so the list doesn't gain a duplicate.
+      delete data.profile.socials[editing];
+      if(data.profile.socialIcons) delete data.profile.socialIcons[editing];
+    } else if(!editing && Object.prototype.hasOwnProperty.call(data.profile.socials, key)){
+      if(!confirm(`"${key}" already exists. Replace its URL?`)) return;
+    }
+
+    data.profile.socials[key] = url;
+    if(icon){
+      data.profile.socialIcons = data.profile.socialIcons || {};
+      data.profile.socialIcons[key] = icon;
+    } else if(data.profile.socialIcons){
+      delete data.profile.socialIcons[key];
+    }
+    resetSocialForm();
+    renderSocialsList();
+    persist(editing ? "Link updated" : "Link added");
+  }
+
+  function removeSocialLink(key){
+    if(!confirm(`Remove the "${key}" link?`)) return;
+    delete data.profile.socials[key];
+    if(data.profile.socialIcons) delete data.profile.socialIcons[key];
+    resetSocialForm();
+    renderSocialsList();
+    persist("Link removed");
+  }
+
+  function renderHeroList(){
+    document.getElementById("hero-list").innerHTML = data.heroSlides.map((s,i) => `
+      <div class="d-flex align-items-center gap-3 border rounded p-2 mb-2" style="border-color:var(--paper-line)!important;">
+        <img src="${s.image}" class="thumb64" alt="">
+        <div class="flex-grow-1" style="min-width:0;overflow-wrap:break-word;">
+          <div style="font-size:.85rem;font-weight:600;">${escapeHtml(s.title)}</div>
+          <div style="font-size:.72rem;color:var(--ink-faint);">${escapeHtml(s.status)} · ${escapeHtml(s.location)}</div>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" onclick="editHeroSlide(${i})" title="Edit"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-sm btn-outline-danger" onclick="removeHeroSlide(${i})" title="Remove"><i class="fa-solid fa-trash"></i></button>
+      </div>`).join("") || `<p style="color:var(--ink-faint);font-size:.85rem;">No slides yet.</p>`;
+  }
+  let heroSlideUploadedImage = null;
+  function setupHeroSlideDropZone(){
+    const dz = document.getElementById("hero-slide-drop-zone");
+    const input = document.getElementById("hs-image-file");
+    if(!dz) return;
+    dz.onclick = () => input.click();
+    dz.addEventListener("dragover", e => { e.preventDefault(); dz.classList.add("drag"); });
+    dz.addEventListener("dragleave", () => dz.classList.remove("drag"));
+    dz.addEventListener("drop", e => {
+      e.preventDefault(); dz.classList.remove("drag");
+      if(e.dataTransfer.files.length){ input.files = e.dataTransfer.files; previewHeroSlideImage(input); }
+    });
+  }
+  function previewHeroSlideImage(input){
+    const file = input.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      heroSlideUploadedImage = e.target.result;
+      document.getElementById("hero-slide-file-label").textContent = "Image selected: " + file.name;
+    };
+    reader.readAsDataURL(file);
+  }
+  function editHeroSlide(i){
+    const s = data.heroSlides[i];
+    document.getElementById("hs-editing-index").value = i;
+    document.getElementById("hs-title").value = s.title;
+    document.getElementById("hs-status").value = s.status;
+    document.getElementById("hs-location").value = s.location;
+    // Carry the existing image forward so saving without re-uploading keeps it.
+    heroSlideUploadedImage = s.image || null;
+    document.getElementById("hs-image-file").value = "";
+    document.getElementById("hero-slide-file-label").textContent = "Current image kept — drop a new one here to replace it";
+    document.getElementById("hs-form-header").textContent = "Edit Slide";
+    document.getElementById("hs-submit-btn").textContent = "Save Changes";
+    document.getElementById("hs-cancel-btn").classList.remove("d-none");
+    document.getElementById("hs-title").focus();
+  }
+
+  function resetHeroSlideForm(){
+    document.getElementById("hs-editing-index").value = "";
+    ["hs-title","hs-status","hs-location","hs-image-file"].forEach(id => document.getElementById(id).value = "");
+    heroSlideUploadedImage = null;
+    document.getElementById("hero-slide-file-label").textContent = "Drag & drop an image here, or click to select one";
+    document.getElementById("hs-form-header").textContent = "Add Slide";
+    document.getElementById("hs-submit-btn").textContent = "Add Slide";
+    document.getElementById("hs-cancel-btn").classList.add("d-none");
+  }
+
+  function saveHeroSlide(){
+    const title = document.getElementById("hs-title").value.trim();
+    const status = document.getElementById("hs-status").value.trim();
+    const location = document.getElementById("hs-location").value.trim();
+    if(!title || !heroSlideUploadedImage){ alert("Please provide a title and upload an image."); return; }
+    const editing = document.getElementById("hs-editing-index").value;
+    const entry = {title, status, location, image: heroSlideUploadedImage};
+    if(editing === ""){
+      data.heroSlides.push(entry);
+    } else {
+      data.heroSlides[Number(editing)] = entry;
+    }
+    resetHeroSlideForm();
+    renderHeroList();
+    persist(editing === "" ? "Slide added" : "Slide updated");
+  }
+
+  function removeHeroSlide(i){
+    data.heroSlides.splice(i,1);
+    resetHeroSlideForm();
+    renderHeroList();
+    persist("Slide removed");
+  }
+
+  /* ABOUT */
+  function saveAbout(){
+    data.about.heading = document.getElementById("a-heading").value;
+    data.about.bio1 = document.getElementById("a-bio1").value;
+    data.about.bio2 = document.getElementById("a-bio2").value;
+    data.about.stats = [
+      { val: document.getElementById("a-stat1v").value, lbl: document.getElementById("a-stat1l").value },
+      { val: document.getElementById("a-stat2v").value, lbl: document.getElementById("a-stat2l").value },
+      { val: document.getElementById("a-stat3v").value, lbl: document.getElementById("a-stat3l").value }
+    ];
+    persist("About section saved");
+  }
+
+  /* SERVICES */
+  // An uploaded icon (data URL) wins over the Font Awesome class when present,
+  // so existing services keep working untouched.
+  let serviceUploadedIcon = null;
+
+  function serviceIconMarkup(s, size){
+    return s.iconImage
+      ? `<img src="${escapeAttr(s.iconImage)}" alt="" style="width:${size}px;height:${size}px;object-fit:contain;flex:0 0 auto;">`
+      : `<i class="fa-solid ${escapeAttr(s.icon || 'fa-circle')}" style="width:${size}px;text-align:center;color:var(--brass-light);flex:0 0 auto;"></i>`;
+  }
+
+  function renderServicesList(){
+    document.getElementById("services-list").innerHTML = data.services.map((s,i) => `
+      <div class="d-flex align-items-center gap-3 border rounded p-2 mb-2" style="border-color:var(--paper-line)!important;">
+        ${serviceIconMarkup(s, 24)}
+        <div class="flex-grow-1" style="min-width:0;overflow-wrap:break-word;">
+          <div style="font-size:.85rem;font-weight:600;">${escapeHtml(s.title)}</div>
+          <div style="font-size:.72rem;color:var(--ink-faint);">${escapeHtml(s.desc)}</div>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" onclick="editService(${i})" title="Edit"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-sm btn-outline-danger" onclick="removeService(${i})" title="Remove"><i class="fa-solid fa-trash"></i></button>
+      </div>`).join("") || `<p style="color:var(--ink-faint);font-size:.85rem;">No services yet.</p>`;
+  }
+
+  function previewServiceIcon(input){
+    const file = input.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      serviceUploadedIcon = e.target.result;
+      document.getElementById("sv-icon-file-label").textContent = "Image selected: " + file.name;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function editService(i){
+    const s = data.services[i];
+    document.getElementById("sv-editing-index").value = i;
+    document.getElementById("sv-icon").value = s.icon || "";
+    document.getElementById("sv-title").value = s.title;
+    document.getElementById("sv-desc").value = s.desc;
+    serviceUploadedIcon = s.iconImage || null;
+    document.getElementById("sv-icon-file").value = "";
+    document.getElementById("sv-icon-file-label").textContent = s.iconImage
+      ? "Using the uploaded image. Choose a file to replace it."
+      : "PNG, JPG or SVG. Overrides the Font Awesome icon.";
+    document.getElementById("sv-form-header").textContent = "Edit Service";
+    document.getElementById("sv-submit-btn").textContent = "Save Changes";
+    document.getElementById("sv-cancel-btn").classList.remove("d-none");
+    document.getElementById("sv-title").focus();
+  }
+
+  function resetServiceForm(){
+    document.getElementById("sv-editing-index").value = "";
+    ["sv-icon","sv-title","sv-desc","sv-icon-file"].forEach(id => document.getElementById(id).value = "");
+    serviceUploadedIcon = null;
+    document.getElementById("sv-icon-file-label").textContent = "PNG, JPG or SVG. Overrides the Font Awesome icon.";
+    document.getElementById("sv-form-header").textContent = "Add Service";
+    document.getElementById("sv-submit-btn").textContent = "Add Service";
+    document.getElementById("sv-cancel-btn").classList.add("d-none");
+  }
+
+  function saveService(){
+    const icon = document.getElementById("sv-icon").value.trim() || "fa-circle";
+    const title = document.getElementById("sv-title").value.trim();
+    const desc = document.getElementById("sv-desc").value.trim();
+    if(!title || !desc){ alert("Please add a title and description."); return; }
+    const editing = document.getElementById("sv-editing-index").value;
+    const entry = {icon, title, desc};
+    if(serviceUploadedIcon) entry.iconImage = serviceUploadedIcon;
+    if(editing === ""){
+      data.services.push(entry);
+    } else {
+      data.services[Number(editing)] = entry;
+    }
+    resetServiceForm();
+    renderServicesList();
+    persist(editing === "" ? "Service added" : "Service updated");
+  }
+
+  function removeService(i){
+    data.services.splice(i,1);
+    resetServiceForm();
+    renderServicesList();
+    persist("Service removed");
+  }
+
+  /* PROCESS */
+  let processUploadedIcon = null;
+
+  function processIconMarkup(s, size){
+    return s.iconImage
+      ? `<img src="${escapeAttr(s.iconImage)}" alt="" style="width:${size}px;height:${size}px;object-fit:contain;flex:0 0 auto;">`
+      : `<span class="font-mono fw-bold" style="color:var(--paper-line);font-size:1.2rem;width:${size}px;flex:0 0 auto;">${escapeHtml(s.step)}</span>`;
+  }
+
+  function renderProcessList(){
+    document.getElementById("process-list").innerHTML = data.process.map((s,i) => `
+      <div class="d-flex align-items-center gap-3 border rounded p-2 mb-2" style="border-color:var(--paper-line)!important;">
+        ${processIconMarkup(s, 36)}
+        <div class="flex-grow-1" style="min-width:0;overflow-wrap:break-word;">
+          <div style="font-size:.85rem;font-weight:600;">${escapeHtml(s.title)}</div>
+          <div style="font-size:.72rem;color:var(--ink-faint);">${escapeHtml(s.desc)}</div>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" onclick="editProcessStep(${i})" title="Edit"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-sm btn-outline-danger" onclick="removeProcessStep(${i})" title="Remove"><i class="fa-solid fa-trash"></i></button>
+      </div>`).join("") || `<p style="color:var(--ink-faint);font-size:.85rem;">No steps yet.</p>`;
+  }
+
+  function previewProcessIcon(input){
+    const file = input.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      processUploadedIcon = e.target.result;
+      document.getElementById("pr-icon-file-label").textContent = "Image selected: " + file.name;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function editProcessStep(i){
+    const s = data.process[i];
+    document.getElementById("pr-editing-index").value = i;
+    document.getElementById("pr-step").value = s.step;
+    document.getElementById("pr-title").value = s.title;
+    document.getElementById("pr-desc").value = s.desc;
+    processUploadedIcon = s.iconImage || null;
+    document.getElementById("pr-icon-file").value = "";
+    document.getElementById("pr-icon-file-label").textContent = s.iconImage
+      ? "Using the uploaded image. Choose a file to replace it."
+      : "Optional — replaces the step numeral on the site.";
+    document.getElementById("pr-form-header").textContent = "Edit Step";
+    document.getElementById("pr-submit-btn").textContent = "Save Changes";
+    document.getElementById("pr-cancel-btn").classList.remove("d-none");
+    document.getElementById("pr-title").focus();
+  }
+
+  function resetProcessForm(){
+    document.getElementById("pr-editing-index").value = "";
+    ["pr-step","pr-title","pr-desc","pr-icon-file"].forEach(id => document.getElementById(id).value = "");
+    processUploadedIcon = null;
+    document.getElementById("pr-icon-file-label").textContent = "Optional — replaces the step numeral on the site.";
+    document.getElementById("pr-form-header").textContent = "Add Step";
+    document.getElementById("pr-submit-btn").textContent = "Add Step";
+    document.getElementById("pr-cancel-btn").classList.add("d-none");
+  }
+
+  function saveProcessStep(){
+    const editing = document.getElementById("pr-editing-index").value;
+    const step = document.getElementById("pr-step").value.trim() || String(data.process.length+1).padStart(2,'0');
+    const title = document.getElementById("pr-title").value.trim();
+    const desc = document.getElementById("pr-desc").value.trim();
+    if(!title || !desc){ alert("Please add a title and description."); return; }
+    const entry = {step, title, desc};
+    if(processUploadedIcon) entry.iconImage = processUploadedIcon;
+    if(editing === ""){
+      data.process.push(entry);
+    } else {
+      data.process[Number(editing)] = entry;
+    }
+    resetProcessForm();
+    renderProcessList();
+    persist(editing === "" ? "Process step added" : "Process step updated");
+  }
+
+  function removeProcessStep(i){
+    data.process.splice(i,1);
+    resetProcessForm();
+    renderProcessList();
+    persist("Step removed");
+  }
+
+  /* CATEGORIES */
+  function catCount(cat){ return data.projects.filter(p => p.category === cat).length; }
+  function renderCategoryChips(){
+    document.getElementById("category-list").innerHTML = data.categories.map((c,i) => `
+      <div class="d-flex align-items-center gap-2 border rounded p-2 mb-2" style="border-color:var(--paper-line)!important;">
+        <div class="d-flex flex-column gap-1">
+          <button class="btn btn-sm btn-outline-secondary py-0 px-1" style="line-height:1;" ${i===0?'disabled':''} onclick="moveCategory(${i},-1)" title="Move up"><i class="fa-solid fa-caret-up"></i></button>
+          <button class="btn btn-sm btn-outline-secondary py-0 px-1" style="line-height:1;" ${i===data.categories.length-1?'disabled':''} onclick="moveCategory(${i},1)" title="Move down"><i class="fa-solid fa-caret-down"></i></button>
+        </div>
+        <span class="font-mono" style="font-size:.7rem;color:var(--ink-faint);width:26px;">${String(i+1).padStart(2,'0')}</span>
+        <div class="flex-grow-1">
+          <span style="font-weight:600;font-size:.85rem;">${escapeHtml(c)}</span>
+          <span class="font-mono ms-1" style="font-size:.7rem;color:var(--ink-faint);">${catCount(c)} project${catCount(c)===1?'':'s'}</span>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" onclick="renameCategory('${escapeAttr(c).replace(/'/g,"\\'")}')" title="Rename"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-sm btn-outline-danger" onclick="removeCategory('${escapeAttr(c).replace(/'/g,"\\'")}')" title="Remove"><i class="fa-solid fa-trash"></i></button>
+      </div>`).join("") || `<p style="color:var(--ink-faint);font-size:.85rem;">No categories yet.</p>`;
+  }
+  function moveCategory(index, dir){
+    const next = index + dir;
+    if(next < 0 || next >= data.categories.length) return;
+    [data.categories[index], data.categories[next]] = [data.categories[next], data.categories[index]];
+    renderCategoryChips();
+    persist("Category order updated");
+  }
+  function renameCategory(oldName){
+    const newName = (prompt("Rename category", oldName) || "").trim();
+    if(!newName || newName === oldName) return;
+    if(data.categories.includes(newName)){ alert("A category with that name already exists."); return; }
+    const idx = data.categories.indexOf(oldName);
+    if(idx === -1) return;
+    data.categories[idx] = newName;
+    data.projects.forEach(p => { if(p.category === oldName) p.category = newName; });
+    if(data.categoryBackgrounds[oldName]){
+      data.categoryBackgrounds[newName] = data.categoryBackgrounds[oldName];
+      delete data.categoryBackgrounds[oldName];
+    }
+    populateCategorySelect();
+    renderCategoryChips();
+    renderCategoryBgManager();
+    renderProjectsTable();
+    persist(`Category renamed to "${newName}"`);
+  }
+
+  /* CATEGORY BACKGROUND IMAGES */
+  function renderCategoryBgManager(){
+    const wrap = document.getElementById("category-bg-manager");
+    if(!wrap) return;
+    wrap.innerHTML = data.categories.map(cat => {
+      const imgs = data.categoryBackgrounds[cat] || [];
+      return `
+      <div class="border rounded p-3 mb-3" style="border-color:var(--paper-line)!important;">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <strong style="font-size:.85rem;">${escapeHtml(cat)}</strong>
+          <span class="font-mono" style="font-size:.68rem;color:var(--ink-faint);">${imgs.length} image${imgs.length===1?'':'s'}</span>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mb-2">
+          ${imgs.map((src,i) => `
+            <div style="position:relative;">
+              <img src="${src}" class="thumb64" alt="">
+              <button onclick="removeCategoryBgImage('${escapeAttr(cat).replace(/'/g,"\\'")}',${i})" title="Remove"
+                style="position:absolute;top:-6px;right:-6px;background:#8A3B2E;color:#fff;border:0;border-radius:50%;width:18px;height:18px;font-size:.6rem;line-height:1;">✕</button>
+            </div>`).join("")}
+        </div>
+        <input type="file" accept="image/*" multiple class="form-control form-control-sm"
+          onchange="addCategoryBgImages('${escapeAttr(cat).replace(/'/g,"\\'")}', this)">
+      </div>`;
+    }).join("") || `<p style="color:var(--ink-faint);font-size:.85rem;">Add a category first (below) to upload backgrounds for it.</p>`;
+  }
+  function addCategoryBgImages(cat, input){
+    const files = Array.from(input.files);
+    if(!files.length) return;
+    if(!data.categoryBackgrounds[cat]) data.categoryBackgrounds[cat] = [];
+    let remaining = files.length;
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        data.categoryBackgrounds[cat].push(e.target.result);
+        remaining--;
+        if(remaining === 0){
+          renderCategoryBgManager();
+          persist("Background image(s) added");
+          input.value = "";
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  function removeCategoryBgImage(cat, idx){
+    data.categoryBackgrounds[cat].splice(idx, 1);
+    renderCategoryBgManager();
+    persist("Background image removed");
+  }
+  function populateCategorySelect(){
+    const sel = document.getElementById("proj-category");
+    const current = sel.value;
+    sel.innerHTML = data.categories.map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join("")
+      + `<option value="__new__">+ Add New Category…</option>`;
+    if(current && data.categories.includes(current)) sel.value = current;
+  }
+
+  function handleCategorySelectChange(sel){
+    if(sel.value !== "__new__") return;
+    const name = (prompt("New project type / category name (e.g. Commercial, Residential, Interior):") || "").trim();
+    if(!name){
+      sel.value = data.categories[0] || "";
+      return;
+    }
+    if(!data.categories.includes(name)){
+      data.categories.push(name);
+      renderCategoryChips();
+      renderCategoryBgManager();
+      persist(`Category "${name}" added`);
+    }
+    populateCategorySelect();
+    sel.value = name;
+  }
+  function addNewCategory(){
+    const input = document.getElementById("new-category-name");
+    const name = input.value.trim();
+    if(!name) return;
+    if(data.categories.includes(name)){ alert("That category already exists."); return; }
+    data.categories.push(name);
+    input.value = "";
+    populateCategorySelect();
+    renderCategoryChips();
+    renderCategoryBgManager();
+    persist(`Category "${name}" added`);
+  }
+  function removeCategory(cat){
+    if(catCount(cat) > 0){
+      if(!confirm(`"${cat}" still has ${catCount(cat)} project(s) linked to it. Remove the category anyway? Those projects will keep their old category label until reassigned.`)) return;
+    }
+    data.categories = data.categories.filter(c => c !== cat);
+    delete data.categoryBackgrounds[cat];
+    populateCategorySelect();
+    renderCategoryChips();
+    renderCategoryBgManager();
+    persist("Category removed");
+  }
+
+  /* PROJECTS */
+  function renderProjectsTable(){
+    document.getElementById("proj-count").textContent = data.projects.length;
+    document.getElementById("projects-table").innerHTML = data.projects.map(p => `
+      <tr>
+        <td><img src="${p.images[0]}" class="thumb64" alt=""></td>
+        <td>${escapeHtml(p.title)}</td>
+        <td>${escapeHtml(p.category)}</td>
+        <td>${escapeHtml(p.client)}</td>
+        <td>${escapeHtml(p.year)}</td>
+        <td class="text-end">
+          <button class="btn btn-sm btn-outline-secondary me-1" onclick="editProject('${p.id}')"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn btn-sm btn-outline-danger" onclick="deleteProject('${p.id}')"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      </tr>`).join("") || `<tr><td colspan="6" class="text-center py-4" style="color:var(--ink-faint);">No projects published yet.</td></tr>`;
+  }
+
+  function setupDragAndDrop(){
+    const dz = document.getElementById("drop-zone");
+    const input = document.getElementById("proj-file");
+    dz.onclick = () => input.click();
+    dz.addEventListener("dragover", e => { e.preventDefault(); dz.classList.add("drag"); });
+    dz.addEventListener("dragleave", () => dz.classList.remove("drag"));
+    dz.addEventListener("drop", e => {
+      e.preventDefault(); dz.classList.remove("drag");
+      if(e.dataTransfer.files.length){ input.files = e.dataTransfer.files; previewFiles(input); }
+    });
+  }
+  function previewFiles(input){
+    const files = Array.from(input.files);
+    if(!files.length) return;
+    document.getElementById("file-label").textContent = `Selected ${files.length} new image file(s)`;
+    uploadedImages = [];
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => uploadedImages.push(e.target.result);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function editProject(id){
+    const p = data.projects.find(x => x.id === id);
+    if(!p) return;
+    document.getElementById("proj-editing-id").value = p.id;
+    document.getElementById("proj-title").value = p.title;
+    document.getElementById("proj-category").value = p.category;
+    document.getElementById("proj-client").value = p.client;
+    document.getElementById("proj-location").value = p.location;
+    document.getElementById("proj-year").value = p.year;
+    document.getElementById("proj-desc").value = p.desc;
+    document.getElementById("proj-form-header").textContent = `Editing: ${p.title}`;
+    document.getElementById("proj-submit-btn").textContent = "Update Project";
+    document.getElementById("proj-cancel-btn").classList.remove("d-none");
+    document.getElementById("file-label").textContent = `${p.images.length} existing photo(s). Select new files to replace them, or leave blank to keep.`;
+    uploadedImages = [...p.images];
+    showTab("portfolio");
+    document.getElementById("project-form").scrollIntoView({behavior:"smooth"});
+  }
+  function resetProjectForm(){
+    document.getElementById("project-form").reset();
+    document.getElementById("proj-editing-id").value = "";
+    document.getElementById("proj-form-header").textContent = "Upload New Project";
+    document.getElementById("proj-submit-btn").textContent = "Publish Project";
+    document.getElementById("proj-cancel-btn").classList.add("d-none");
+    document.getElementById("file-label").textContent = "Drag & drop images here, or click to select files";
+    uploadedImages = [];
+  }
+  function handleProjectSubmit(e){
+    e.preventDefault();
+    const editId = document.getElementById("proj-editing-id").value;
+    const images = uploadedImages.length ? uploadedImages : ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=80"];
+    const payload = {
+      title: document.getElementById("proj-title").value,
+      category: document.getElementById("proj-category").value,
+      client: document.getElementById("proj-client").value,
+      location: document.getElementById("proj-location").value,
+      year: document.getElementById("proj-year").value,
+      desc: document.getElementById("proj-desc").value,
+      images
+    };
+    if(editId){
+      const idx = data.projects.findIndex(p => p.id === editId);
+      if(idx !== -1) data.projects[idx] = { ...data.projects[idx], ...payload };
+      persist("Project updated");
+    } else {
+      data.projects.unshift({ id: "p" + Date.now(), ...payload });
+      persist("Project published");
+    }
+    resetProjectForm();
+    renderProjectsTable();
+    renderCategoryChips();
+  }
+  function deleteProject(id){
+    if(!confirm("Delete this project? This can't be undone.")) return;
+    data.projects = data.projects.filter(p => p.id !== id);
+    renderProjectsTable();
+    renderCategoryChips();
+    persist("Project deleted");
+  }
+
+  /* EBOOKS */
+  function renderEbooksTable(){
+    document.getElementById("ebook-count").textContent = data.ebooks.length;
+    document.getElementById("ebooks-table").innerHTML = data.ebooks.map(b => `
+      <tr>
+        <td><img src="${b.cover}" class="thumb64" alt=""></td>
+        <td>${escapeHtml(b.title)}</td>
+        <td>${escapeHtml(b.type)}</td>
+        <td>${escapeHtml(b.author)}</td>
+        <td>${escapeHtml(b.year)}</td>
+        <td class="text-end">
+          <button class="btn btn-sm btn-outline-secondary me-1" onclick="editEbook('${b.id}')"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn btn-sm btn-outline-danger" onclick="deleteEbook('${b.id}')"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      </tr>`).join("") || `<tr><td colspan="6" class="text-center py-4" style="color:var(--ink-faint);">No publications yet.</td></tr>`;
+  }
+  function previewPdf(input){
+    const file = input.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = e => { uploadedPdf = e.target.result; };
+    reader.readAsDataURL(file);
+  }
+  function editEbook(id){
+    const b = data.ebooks.find(x => x.id === id);
+    if(!b) return;
+    document.getElementById("ebook-editing-id").value = b.id;
+    document.getElementById("ebook-title").value = b.title;
+    document.getElementById("ebook-author").value = b.author;
+    document.getElementById("ebook-type").value = b.type;
+    document.getElementById("ebook-year").value = b.year;
+    document.getElementById("ebook-cover").value = b.cover;
+    document.getElementById("ebook-desc").value = b.desc;
+    document.getElementById("ebook-pdf-url").value = b.pdfUrl;
+    document.getElementById("ebook-form-header").textContent = `Editing: ${b.title}`;
+    document.getElementById("ebook-submit-btn").textContent = "Update Publication";
+    document.getElementById("ebook-cancel-btn").classList.remove("d-none");
+    uploadedPdf = null;
+    showTab("ebooks");
+    document.getElementById("ebook-form").scrollIntoView({behavior:"smooth"});
+  }
+  function resetEbookForm(){
+    document.getElementById("ebook-form").reset();
+    document.getElementById("ebook-editing-id").value = "";
+    document.getElementById("ebook-form-header").textContent = "Upload New E-Book / Paper";
+    document.getElementById("ebook-submit-btn").textContent = "Publish E-Book / Paper";
+    document.getElementById("ebook-cancel-btn").classList.add("d-none");
+    uploadedPdf = null;
+  }
+  function handleEbookSubmit(e){
+    e.preventDefault();
+    const editId = document.getElementById("ebook-editing-id").value;
+    const urlField = document.getElementById("ebook-pdf-url").value.trim();
+    const payload = {
+      title: document.getElementById("ebook-title").value,
+      author: document.getElementById("ebook-author").value,
+      type: document.getElementById("ebook-type").value,
+      year: document.getElementById("ebook-year").value,
+      desc: document.getElementById("ebook-desc").value,
+      cover: document.getElementById("ebook-cover").value || "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80",
+      pdfUrl: uploadedPdf || urlField || "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+    };
+    if(editId){
+      const idx = data.ebooks.findIndex(b => b.id === editId);
+      if(idx !== -1) data.ebooks[idx] = { ...data.ebooks[idx], ...payload };
+      persist("Publication updated");
+    } else {
+      data.ebooks.unshift({ id: "b" + Date.now(), ...payload });
+      persist("Publication published");
+    }
+    resetEbookForm();
+    renderEbooksTable();
+  }
+  function deleteEbook(id){
+    if(!confirm("Delete this publication? This can't be undone.")) return;
+    data.ebooks = data.ebooks.filter(b => b.id !== id);
+    renderEbooksTable();
+    persist("Publication deleted");
+  }
+
+  /* LOCATION */
+  function saveLocation(){
+    data.location.name = document.getElementById("loc-name").value;
+    data.location.tagline = document.getElementById("loc-tagline").value;
+    data.location.hours = document.getElementById("loc-hours").value;
+    data.location.email = document.getElementById("loc-email").value;
+    data.location.phone = document.getElementById("loc-phone").value;
+    data.location.directionsUrl = document.getElementById("loc-directions").value;
+    data.location.mapEmbed = document.getElementById("loc-map").value;
+    persist("Location & contact saved");
+  }
+
+  /* Every declaration above is now initialised, so it is safe to restore a
+     signed-in session and render the dashboard. */
+  if(Auth.isLoggedIn()) enterDashboard();
+</script>
+</body>
+</html>

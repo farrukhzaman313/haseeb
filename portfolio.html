@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Portfolio — Ar. Haseeb Ullah</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="portfolio">
+<a href="#main" class="skip-link">Skip to content</a>
+
+<header class="site-header">
+  <nav class="navbar navbar-expand-lg" aria-label="Main navigation">
+    <div class="container-wide d-flex align-items-center justify-content-between w-100 py-2">
+      <a class="navbar-brand" href="index.html">Ar. Haseeb Ullah<small id="brand-tagline">Architecture &amp; BIM Practice</small></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+      <div class="collapse navbar-collapse flex-grow-0" id="mainNav">
+        <ul class="navbar-nav site-nav align-items-lg-center gap-lg-1 mt-3 mt-lg-0">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link active" href="portfolio.html">Portfolio</a></li>
+          <li class="nav-item"><a class="nav-link" href="ebooks.html"><i class="fa-solid fa-book-open me-1"></i>E-Books</a></li>
+          <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="services.html">Services</a></li>
+          <li class="nav-item"><a class="nav-link" href="process.html">Process</a></li>
+          <li class="nav-item"><a class="nav-link" href="location.html">Location</a></li>
+        </ul>
+        <a href="admin.html" class="nav-admin-icon ms-lg-3 mt-3 mt-lg-0" title="Studio Access (Admin)" aria-label="Studio Access (Admin)"><i class="fa-solid fa-user-lock"></i></a>
+      </div>
+    </div>
+  </nav>
+</header>
+
+
+<main id="main">
+  <!-- One continuous photographic ground: the slideshow runs behind the intro
+       and on down behind the typology cards, rather than stopping at the hero. -->
+  <div class="page-ground">
+    <div id="page-bg-slider" class="page-bg-slider"></div>
+    <div class="page-bg-overlay"></div>
+
+    <section class="page-hero-sm">
+      <div class="container-wide">
+        <p class="eyebrow" id="intro-eyebrow">Design Index</p>
+        <h1 class="section-title" id="intro-heading">Project Index by Typology</h1>
+        <p style="color:rgba(251,249,243,.75);max-width:600px;" class="mt-2 mb-0" id="intro-subtext">Select an architectural category to open its dedicated gallery archive.</p>
+      </div>
+    </section>
+
+    <!-- CATEGORY OVERVIEW -->
+    <section class="section-pad" id="categories-view">
+      <div class="container-wide">
+        <div class="row g-4" id="categories-grid"></div>
+      </div>
+    </section>
+
+    <!-- PROJECT GALLERY -->
+    <section class="section-pad d-none" id="projects-view">
+      <div class="container-wide">
+        <button class="btn-brass btn-sm mb-4" onclick="showCategories()"><i class="fa-solid fa-arrow-left me-2"></i>Back to Typology Index</button>
+        <h2 class="section-title mb-4" id="category-title"></h2>
+        <div class="row g-4" id="projects-grid"></div>
+        <nav class="d-flex justify-content-center mt-5">
+          <ul class="pagination pagination-plates" id="pagination-controls"></ul>
+        </nav>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- IMAGE LIGHTBOX -->
+<div class="modal fade" id="lightboxModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" style="background:var(--ink);color:var(--white);border-radius:2px;border-color:rgba(255,255,255,.15);">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title font-display" id="lightbox-title"></h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="lightbox-img" src="" alt="" style="max-width:100%;max-height:60vh;object-fit:contain;border:1px solid rgba(255,255,255,.15);">
+        <p class="font-mono mt-3 mb-0" style="font-size:.7rem;color:rgba(251,249,243,.6);" id="lightbox-counter"></p>
+        <p class="mt-2" style="font-size:.85rem;color:rgba(251,249,243,.8);" id="lightbox-desc"></p>
+      </div>
+      <div class="modal-footer border-0 justify-content-center pt-0">
+        <button class="btn btn-outline-paper btn-sm" onclick="lightboxPrev()"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="btn btn-outline-paper btn-sm" onclick="lightboxNext()"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer py-5 mt-auto">
+  <div class="container-wide">
+    <div class="row gy-4">
+      <div class="col-md-6">
+        <p class="font-mono" style="font-size:.68rem;letter-spacing:.06em;" id="footer-tagline">ARCHITECTURE &amp; BIM PRACTICE</p>
+        <div class="fs-5 mt-3 d-flex gap-3" id="footer-socials"></div>
+      </div>
+      <div class="col-md-6 d-flex flex-column align-items-start align-items-md-end text-md-end">
+        <p class="eyebrow mb-2">Contact</p>
+        <p class="mb-1"><a id="footer-email" href="#">info@hkarchitecture.com</a></p>
+        <p class="mb-0" id="footer-phone">+92 300 0000000</p>
+        <a href="admin.html" class="studio-access mt-3"><i class="fa-solid fa-user-lock me-1"></i>Studio Access</a>
+      </div>
+    </div>
+    <hr class="rule" style="border-color:rgba(220,231,230,.12);margin:2rem 0 1rem;">
+    <p class="mb-0 text-center text-md-start" style="font-size:.7rem;" id="footer-copyright-line"></p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+  const data = Store.get();
+  applyFooter(data);
+  applyPageTitle(data, "portfolio");
+  applyPageIntro(data, "portfolio");
+
+  const ITEMS_PER_PAGE = 6;
+  let currentPage = 1;
+  let selectedCategory = null;
+  let lightboxImages = [];
+  let lightboxIdx = 0;
+  let lightboxModal;
+
+  function catCount(cat){ return data.projects.filter(p => p.category === cat).length; }
+
+  function renderCategories(){
+    const grid = document.getElementById("categories-grid");
+    if(!data.categories.length){
+      grid.innerHTML = `<div class="col-12 text-center py-5" style="color:var(--ink-faint);">No categories yet. Add one from the admin panel.</div>`;
+      return;
+    }
+    grid.innerHTML = data.categories.map((cat, i) => {
+      const img = categoryCoverImage(data, cat);
+      return `
+      <div class="col-md-6 col-lg-4 col-xl-3">
+        <div class="category-card" onclick="openCategory('${escapeAttr(cat).replace(/'/g,"\\'")}')">
+          <img src="${img}" alt="${escapeAttr(cat)}">
+          <div class="overlay">
+            <span class="idx">TYPOLOGY ${String(i+1).padStart(2,'0')}</span>
+            <h3>${escapeHtml(cat)}</h3>
+            <span class="count">${catCount(cat)} Project${catCount(cat)===1?'':'s'}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  function openCategory(cat){
+    selectedCategory = cat;
+    currentPage = 1;
+    document.getElementById("categories-view").classList.add("d-none");
+    document.getElementById("projects-view").classList.remove("d-none");
+    document.getElementById("category-title").textContent = cat;
+    renderProjects();
+    renderPageBgSlider("page-bg-slider", flattenCategoryBackgrounds(data, cat));
+    document.getElementById("projects-view").scrollIntoView({behavior:"smooth", block:"start"});
+  }
+
+  function showCategories(){
+    selectedCategory = null;
+    document.getElementById("projects-view").classList.add("d-none");
+    document.getElementById("categories-view").classList.remove("d-none");
+    renderCategories();
+    renderPageBgSlider("page-bg-slider", flattenCategoryBackgrounds(data));
+  }
+
+  function renderProjects(){
+    const all = data.projects.filter(p => p.category === selectedCategory);
+    const totalPages = Math.max(1, Math.ceil(all.length / ITEMS_PER_PAGE));
+    currentPage = Math.min(currentPage, totalPages);
+    const start = (currentPage-1)*ITEMS_PER_PAGE;
+    const pageItems = all.slice(start, start+ITEMS_PER_PAGE);
+
+    const grid = document.getElementById("projects-grid");
+    grid.innerHTML = pageItems.length ? pageItems.map(p => `
+      <div class="col-md-6 col-lg-4">
+        <div class="project-card card-plate">
+          <div class="imgwrap" role="button" onclick='openLightbox(${JSON.stringify(p.images)}, "${escapeAttr(p.title).replace(/"/g,'&quot;')}", "${escapeAttr(p.desc).replace(/"/g,'&quot;')}")'>
+            <span class="badge-cat">${escapeHtml(p.category)}</span>
+            <img src="${p.images[0]}" alt="${escapeAttr(p.title)}">
+          </div>
+          <div class="body">
+            <div class="meta">${escapeHtml(p.client)} · ${escapeHtml(p.location)} · ${escapeHtml(p.year)}</div>
+            <h3>${escapeHtml(p.title)}</h3>
+            <p style="font-size:.85rem;color:var(--ink-soft);">${escapeHtml(p.desc)}</p>
+            ${p.images.length>1 ? `<span class="font-mono" style="font-size:.65rem;color:var(--ink-faint);"><i class="fa-solid fa-images me-1"></i>${p.images.length} photos</span>`:""}
+          </div>
+        </div>
+      </div>`).join("") : `<div class="col-12 text-center py-5" style="color:var(--ink-faint);">No projects in this category yet.</div>`;
+
+    const pag = document.getElementById("pagination-controls");
+    pag.innerHTML = "";
+    for(let i=1;i<=totalPages;i++){
+      pag.innerHTML += `<li class="page-item ${i===currentPage?'active':''}"><button class="page-link" onclick="gotoPage(${i})">${i}</button></li>`;
+    }
+  }
+  function gotoPage(i){ currentPage = i; renderProjects(); document.getElementById("projects-view").scrollIntoView({behavior:"smooth", block:"start"}); }
+
+  function openLightbox(images, title, desc){
+    lightboxImages = images; lightboxIdx = 0;
+    document.getElementById("lightbox-title").textContent = title;
+    document.getElementById("lightbox-desc").textContent = desc;
+    renderLightbox();
+    lightboxModal.show();
+  }
+  function renderLightbox(){
+    document.getElementById("lightbox-img").src = lightboxImages[lightboxIdx];
+    document.getElementById("lightbox-counter").textContent = `${lightboxIdx+1} / ${lightboxImages.length}`;
+  }
+  function lightboxNext(){ lightboxIdx = (lightboxIdx+1)%lightboxImages.length; renderLightbox(); }
+  function lightboxPrev(){ lightboxIdx = (lightboxIdx-1+lightboxImages.length)%lightboxImages.length; renderLightbox(); }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    lightboxModal = new bootstrap.Modal(document.getElementById("lightboxModal"));
+    renderCategories();
+    renderPageBgSlider("page-bg-slider", flattenCategoryBackgrounds(data));
+    const params = new URLSearchParams(location.search);
+    const cat = params.get("cat");
+    if(cat && data.categories.includes(cat)) openCategory(cat);
+  });
+</script>
+</body>
+</html>

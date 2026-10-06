@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ar. Haseeb Ullah — Architectural Design &amp; BIM Practice</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Architectural design, BIM and interior practice led by Ar. Haseeb Ullah.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="home">
+<a href="#main" class="skip-link">Skip to content</a>
+
+<!-- HEADER -->
+<header class="site-header">
+  <nav class="navbar navbar-expand-lg" aria-label="Main navigation">
+    <div class="container-wide d-flex align-items-center justify-content-between w-100 py-2">
+      <a class="navbar-brand" href="index.html">Ar. Haseeb Ullah<small id="brand-tagline">Architecture &amp; BIM Practice</small></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+      <div class="collapse navbar-collapse flex-lg-grow-0" id="mainNav">
+        <ul class="navbar-nav site-nav align-items-lg-center gap-lg-1 mt-3 mt-lg-0">
+          <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="portfolio.html">Portfolio</a></li>
+          <li class="nav-item"><a class="nav-link" href="ebooks.html"><i class="fa-solid fa-book-open me-1"></i>E-Books</a></li>
+          <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="services.html">Services</a></li>
+          <li class="nav-item"><a class="nav-link" href="process.html">Process</a></li>
+          <li class="nav-item"><a class="nav-link" href="location.html">Location</a></li>
+        </ul>
+        <a href="admin.html" class="nav-admin-icon ms-lg-3 mt-3 mt-lg-0" title="Studio Access (Admin)" aria-label="Studio Access (Admin)"><i class="fa-solid fa-user-lock"></i></a>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div id="hero-slides"></div>
+    <div class="hero-content">
+      <p class="eyebrow" style="color:var(--brass-light)" id="hero-eyebrow">Featured Work In Progress</p>
+      <h1 class="hero-title" id="hero-current-title">Loading&hellip;</h1>
+      <p id="hero-current-desc" style="max-width:520px;color:rgba(251,249,243,.8);font-size:.92rem;"></p>
+
+      <div class="hero-panels">
+        <div class="profile-chip">
+          <img id="hero-profile-img" src="./assets/img/438348077_467159666264180_1363624297685461631_n.jpg" alt="">
+          <div>
+            <div class="name" id="hero-profile-name"></div>
+            <div class="role" id="hero-profile-title"></div>
+            <div class="socials mt-1" id="hero-profile-socials"></div>
+          </div>
+        </div>
+
+        <div class="upcoming-chip">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="tag">Upcoming / In Progress</span>
+            <div class="d-flex gap-2">
+              <button class="btn-arrow" onclick="heroPrev()" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
+              <button class="btn-arrow" onclick="heroNext()" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+          </div>
+          <h3 id="hero-slide-title"></h3>
+          <p id="hero-slide-desc"></p>
+          <div class="slide-dots" id="hero-dots"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUICK STATS / ABOUT TEASER -->
+  <section class="section-pad blueprint-ground">
+    <div class="container-wide">
+      <div class="row gy-5 align-items-center">
+        <div class="col-lg-7">
+          <p class="eyebrow" style="color:var(--brass-light)">About The Practice</p>
+          <h2 class="section-title text-white" id="home-about-heading"></h2>
+          <p class="mt-3" style="color:rgba(251,249,243,.8);max-width:640px;" id="home-about-bio"></p>
+          <a href="about.html" class="btn-brass d-inline-flex align-items-center gap-2 mt-2">Read Full Profile <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <div class="col-lg-5">
+          <div class="row g-3" id="home-stats"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PORTFOLIO TEASER -->
+  <!-- No dividing rule above: the slideshow runs edge to edge from where the
+       ink-black About band ends, so the change of ground is the separator. -->
+  <section class="section-pad position-relative overflow-hidden">
+    <div id="design-index-slides" class="page-bg-slider"></div>
+    <div class="page-bg-overlay"></div>
+    <div class="container-wide position-relative" style="z-index:2;">
+      <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-3">
+        <div>
+          <p class="eyebrow">Selected Typologies</p>
+          <h2 class="section-title">Design Index</h2>
+        </div>
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <!-- Only rendered when the typologies overflow one page of four. -->
+          <div id="home-cat-nav" class="d-none align-items-center gap-2">
+            <button class="btn-arrow" onclick="catPrev()" aria-label="Previous typologies"><i class="fa-solid fa-chevron-left"></i></button>
+            <span id="home-cat-counter" class="font-mono" style="font-size:.7rem;letter-spacing:.08em;color:var(--brass-light);"></span>
+            <button class="btn-arrow" onclick="catNext()" aria-label="Next typologies"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+          <a href="portfolio.html" class="btn-brass d-inline-flex align-items-center gap-2">View Full Portfolio <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+      </div>
+      <div class="row g-4" id="home-category-grid"></div>
+    </div>
+  </section>
+
+  <!-- DARK CTA STRIP -->
+  <section class="blueprint-ground section-pad text-center position-relative">
+    <div class="container-wide">
+      <p class="eyebrow" style="color:var(--brass-light)" id="cta-eyebrow">Start A Project</p>
+      <h2 class="section-title text-white" id="cta-heading">Let's put your site plan on the boards.</h2>
+      <p class="mx-auto mt-2" style="max-width:520px;color:rgba(251,249,243,.75);" id="cta-body">From first sketch to construction documentation — book a consultation to discuss scope, timeline and budget.</p>
+      <a href="location.html" class="btn-brass d-inline-flex align-items-center gap-2 mt-3"><span id="cta-button">Get In Touch</span> <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="site-footer py-5 mt-auto">
+  <div class="container-wide">
+    <div class="row gy-4">
+     
+      <div class="col-md-6">
+        <p class="font-mono" style="font-size:.68rem;letter-spacing:.06em;" id="footer-tagline">ARCHITECTURE &amp; BIM PRACTICE</p>
+        <div class="fs-5 mt-3 d-flex gap-3" id="footer-socials"></div>
+      </div>
+      <div class="col-md-6 d-flex flex-column align-items-start align-items-md-end text-md-end gap-2">
+        <p class="eyebrow mb-2">Contact</p>
+        <p class="mb-1"><a id="footer-email" href="#">haseebkhankpk1@gmail.com</a></p>
+        <p class="mb-0" id="footer-phone">+92 313 0961515</p>
+        <a href="admin.html" class="studio-access mt-3 gap-2"><i class="fa-solid fa-user-lock me-1"></i>Studio Access</a>
+      </div>
+    </div>
+    <hr class="rule" style="border-color:rgba(220,231,230,.12);margin:2rem 0 1rem;">
+    <p class="mb-0 text-center text-md-start" style="font-size:.7rem;" id="footer-copyright-line"></p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+  const data = Store.get();
+  applyFooter(data);
+  applyPageTitle(data, "home");
+
+  document.getElementById("hero-eyebrow").textContent = data.siteText.homeHeroEyebrow;
+  document.getElementById("cta-eyebrow").textContent = data.siteText.homeCta.eyebrow;
+  document.getElementById("cta-heading").textContent = data.siteText.homeCta.heading;
+  document.getElementById("cta-body").textContent = data.siteText.homeCta.body;
+  document.getElementById("cta-button").textContent = data.siteText.homeCta.buttonLabel;
+
+  // Profile chip
+  document.getElementById("hero-profile-img").src = data.profile.image;
+  document.getElementById("hero-profile-name").textContent = data.profile.name;
+  document.getElementById("hero-profile-title").textContent = data.profile.title;
+  document.getElementById("hero-profile-socials").innerHTML = Object.entries(data.profile.socials).map(([key,url])=>{
+    const icon = socialIconFor(data, key);
+    return `<a href="${escapeAttr(url)}" target="_blank" rel="noopener" aria-label="${key}"><i class="${icon}"></i></a>`;
+  }).join("");
+
+  // About teaser
+  document.getElementById("home-about-heading").textContent = data.about.heading;
+  document.getElementById("home-about-bio").textContent = data.about.bio1;
+  document.getElementById("home-stats").innerHTML = data.about.stats.map(s => `
+    <div class="col-6">
+      <div class="card-plate p-3 text-center">
+        <div class="font-display fw-bold" style="font-size:1.6rem;color:var(--brass-light);">${escapeHtml(s.val)}</div>
+        <div class="font-mono" style="font-size:.65rem;letter-spacing:.06em;color:var(--ink-faint);text-transform:uppercase;">${escapeHtml(s.lbl)}</div>
+      </div>
+    </div>`).join("");
+
+  // Category teaser
+  const catCounts = {};
+  data.projects.forEach(p => catCounts[p.category] = (catCounts[p.category]||0) + 1);
+  // Every typology renders, paged four at a time — categories added in the
+  // admin panel surface here as extra pages instead of being cut off.
+  const CATS_PER_PAGE = 4;
+  const featuredCats = data.categories.map(cat => ({ cat, img: categoryCoverImage(data, cat) }));
+  const catPageCount = Math.max(1, Math.ceil(featuredCats.length / CATS_PER_PAGE));
+  let catPage = 0;
+
+  document.getElementById("home-category-grid").innerHTML = featuredCats.map(({cat, img}, i) => `
+    <div class="col-md-6 col-lg-3 home-cat-col" data-cat-page="${Math.floor(i / CATS_PER_PAGE)}">
+      <a href="portfolio.html?cat=${encodeURIComponent(cat)}" class="category-card d-block">
+        <img src="${img}" alt="${escapeAttr(cat)}">
+        <div class="overlay">
+          <span class="idx">TYPOLOGY ${String(i+1).padStart(2,'0')}</span>
+          <h3>${escapeHtml(cat)}</h3>
+          <span class="count">${catCounts[cat]||0} Project${(catCounts[cat]||0)===1?'':'s'}</span>
+        </div>
+      </a>
+    </div>`).join("");
+
+  function renderCatPage(){
+    document.querySelectorAll(".home-cat-col").forEach(col => {
+      col.classList.toggle("d-none", Number(col.dataset.catPage) !== catPage);
+    });
+    const nav = document.getElementById("home-cat-nav");
+    const multi = catPageCount > 1;
+    nav.classList.toggle("d-none", !multi);
+    nav.classList.toggle("d-flex", multi);
+    document.getElementById("home-cat-counter").textContent = `${catPage+1} / ${catPageCount}`;
+  }
+  function catNext(){ catPage = (catPage + 1) % catPageCount; renderCatPage(); }
+  function catPrev(){ catPage = (catPage - 1 + catPageCount) % catPageCount; renderCatPage(); }
+  renderCatPage();
+
+  // Design Index background slideshow — crossfades the same category covers
+  // shown on the cards. The About band above it stays a flat ink ground.
+  renderPageBgSlider("design-index-slides", featuredCats.map(f => f.img));
+
+  // Hero background + upcoming slider
+  let heroIdx = 0;
+  const slides = data.heroSlides.length ? data.heroSlides : [{title:"Studio",status:"",location:"",image:""}];
+  document.getElementById("hero-slides").innerHTML = slides.map((s,i)=>
+    `<div class="hero-slide" style="opacity:${i===0?1:0};background-image:url('${s.image}')" data-i="${i}"></div>`
+  ).join("");
+
+  function renderHero() {
+    const s = slides[heroIdx];
+    document.getElementById("hero-current-title").textContent = s.title;
+    document.getElementById("hero-current-desc").textContent = `${s.status} — ${s.location}`;
+    document.getElementById("hero-slide-title").textContent = s.title;
+    document.getElementById("hero-slide-desc").textContent = `Status: ${s.status} | Location: ${s.location}`;
+    document.querySelectorAll(".hero-slide").forEach(el => el.style.opacity = (+el.dataset.i === heroIdx) ? 1 : 0);
+    document.getElementById("hero-dots").innerHTML = slides.map((_,i)=>`<button class="${i===heroIdx?'active':''}" onclick="heroGoto(${i})" aria-label="Slide ${i+1}"></button>`).join("");
+  }
+  
+  function heroGoto(i){ heroIdx = i; renderHero(); }
+  function heroNext(){ heroIdx = (heroIdx+1)%slides.length; renderHero(); }
+  function heroPrev(){ heroIdx = (heroIdx-1+slides.length)%slides.length; renderHero(); }
+  renderHero();
+  setInterval(heroNext, 6000);
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+.vscode/
+.idea/
+
+# Local tooling
+.claude/
+node_modules/
+
+# Archives — don't commit zips of the site into the site
+*.zip

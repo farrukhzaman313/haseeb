@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Design Process — Ar. Haseeb Ullah</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="process">
+<a href="#main" class="skip-link">Skip to content</a>
+
+<header class="site-header">
+  <nav class="navbar navbar-expand-lg" aria-label="Main navigation">
+    <div class="container-wide d-flex align-items-center justify-content-between w-100 py-2">
+      <a class="navbar-brand" href="index.html">Ar. Haseeb Ullah<small id="brand-tagline">Architecture &amp; BIM Practice</small></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+      <div class="collapse navbar-collapse flex-grow-0" id="mainNav">
+        <ul class="navbar-nav site-nav align-items-lg-center gap-lg-1 mt-3 mt-lg-0">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="portfolio.html">Portfolio</a></li>
+          <li class="nav-item"><a class="nav-link" href="ebooks.html"><i class="fa-solid fa-book-open me-1"></i>E-Books</a></li>
+          <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="services.html">Services</a></li>
+          <li class="nav-item"><a class="nav-link active" href="process.html">Process</a></li>
+          <li class="nav-item"><a class="nav-link" href="location.html">Location</a></li>
+        </ul>
+        <a href="admin.html" class="nav-admin-icon ms-lg-3 mt-3 mt-lg-0" title="Studio Access (Admin)" aria-label="Studio Access (Admin)"><i class="fa-solid fa-user-lock"></i></a>
+      </div>
+    </div>
+  </nav>
+</header>
+
+
+<main id="main">
+  <section class="blueprint-ground page-hero-sm position-relative">
+    <div class="container-wide">
+      <p class="eyebrow" id="intro-eyebrow">Methodology</p>
+      <h1 class="section-title" id="intro-heading">Our Design Process</h1>
+      <p style="color:rgba(251,249,243,.75);max-width:600px;" class="mt-2 mb-0" id="intro-subtext"></p>
+    </div>
+  </section>
+
+  <section class="section-pad">
+    <div class="container-wide">
+      <div class="row g-4" id="process-grid"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer py-5 mt-auto">
+  <div class="container-wide">
+    <div class="row gy-4">
+      <div class="col-md-6">
+        <p class="font-mono" style="font-size:.68rem;letter-spacing:.06em;" id="footer-tagline">ARCHITECTURE &amp; BIM PRACTICE</p>
+        <div class="fs-5 mt-3 d-flex gap-3" id="footer-socials"></div>
+      </div>
+      <div class="col-md-6 d-flex flex-column align-items-start align-items-md-end text-md-end">
+        <p class="eyebrow mb-2">Contact</p>
+        <p class="mb-1"><a id="footer-email" href="#">info@hkarchitecture.com</a></p>
+        <p class="mb-0" id="footer-phone">+92 300 0000000</p>
+        <a href="admin.html" class="studio-access mt-3"><i class="fa-solid fa-user-lock me-1"></i>Studio Access</a>
+      </div>
+    </div>
+    <hr class="rule" style="border-color:rgba(220,231,230,.12);margin:2rem 0 1rem;">
+    <p class="mb-0 text-center text-md-start" style="font-size:.7rem;" id="footer-copyright-line"></p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+  const data = Store.get();
+  applyFooter(data);
+  applyPageTitle(data, "process");
+  applyPageIntro(data, "process");
+  document.getElementById("process-grid").innerHTML = data.process.map(s => `
+    <div class="col-md-6 col-lg-3">
+      <div class="process-card card-plate">
+        ${s.iconImage
+          ? `<img class="step-icon-img" src="${escapeAttr(s.iconImage)}" alt="">`
+          : `<div class="step">${escapeHtml(s.step)}</div>`}
+        <h3>${escapeHtml(s.title)}</h3>
+        <p style="font-size:.82rem;color:var(--ink-soft);">${escapeHtml(s.desc)}</p>
+      </div>
+    </div>`).join("");
+</script>
+</body>
+</html>
